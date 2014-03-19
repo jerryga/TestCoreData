@@ -18,6 +18,10 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
+    
+    [self insertCoreData];
+    [self dataFetchRequest];
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
@@ -136,6 +140,35 @@
     }    
     
     return _persistentStoreCoordinator;
+}
+
+- (void)insertCoreData {
+    NSManagedObjectContext *context = [self managedObjectContext];
+    
+    NSManagedObject *contactInfo = [NSEntityDescription insertNewObjectForEntityForName:@"ContactInfo" inManagedObjectContext:context];
+    [contactInfo setValue:@"Ga" forKey:@"name"];
+    
+    NSManagedObject *contactDetailInfo = [NSEntityDescription insertNewObjectForEntityForName:@"ContactDetailInfo" inManagedObjectContext:context];
+    [contactDetailInfo setValue:@"Beijing" forKey:@"address"];
+    
+    NSError *error;
+    if (![context save:&error]) {
+        NSLog(@"save failed %@",[error localizedDescription]);
+    }
+}
+
+- (void)dataFetchRequest {
+    NSManagedObjectContext *context = [self managedObjectContext];
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"ContactInfo" inManagedObjectContext:context];
+    [fetchRequest setEntity:entity];
+    
+    NSError *error;
+    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
+    
+    for (NSManagedObject *info in fetchedObjects) {
+        NSLog(@"name %@",[info valueForKey:@"name"]);
+    }
 }
 
 #pragma mark - Application's Documents directory
